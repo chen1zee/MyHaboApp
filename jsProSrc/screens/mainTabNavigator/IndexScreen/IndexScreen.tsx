@@ -1,42 +1,89 @@
 import React from "react"
-import {requireNativeComponent, StyleSheet, Text, View} from "react-native"
-import Swiper from "js_pro_src/components/Swiper/Swiper";
+import {StatusBar, StyleSheet, View, Text} from "react-native"
+import {BTM_TAB_HEIGHT} from "js_pro_src/styles/size";
+import {screenH} from "js_pro_src/utils/sizes";
+import ScrollPager from "js_pro_src/components/ScrollPager";
+import produce from "immer";
 
 type VideoItemType = {
   id?: number, src?: string
 }
-
 type StateType = {
-  videoList: VideoItemType[]
+  videoList: VideoItemType[],
 }
+const PAGE_HEIGHT = screenH - BTM_TAB_HEIGHT - (StatusBar.currentHeight || 0)
 
-// TODO https://blog.csdn.net/qq_21793463/article/details/52184864
-// TODO https://reactnative.cn/docs/native-components-android/
-const RTCButton = requireNativeComponent("RCTButton")
+/**
+ * TODO 使用 缓存 10 部 影片方法，， 当到达10部 && (在底部下一部时 || 在顶部上一步时)
+ * TODO 清除 10部缓存，， 变为 3部结构 [(上)(now)(下)] -> 并 callback scrollTo()
+ * TODO 将 CACHE算法 写在 ScrollPager 中
+ * */
+const CACHE_VIDEO_LEN = 3
+
+// TODO mock
+const idCreator = (() => {
+  let i = 0
+  return () => ++i
+})()
+const videoItemCreator = () => ({ id: idCreator(), src: "" })
 
 class IndexScreen extends React.Component<any, StateType> {
-  private SwiperRef // Swiper Ref
+  private ScrollViewRef; // ScrollView Ref
   constructor(props) {
     super(props)
     this.state = {
       videoList: [
-        // {}, // 上一步影片   //  若刚进入app 无上一步影片 通过 用户 上划 push 影片
-        { id: 1, src: "" }, // ing
-        { id: 2, src: "" }, // ing
-        { id: 3, src: "" }, // ing
-        { id: 4, src: "" }, // ing
-        { id: 5, src: "" }, // 存放下一步影片
-      ]
+        // videoItemCreator(), // 上一步影片 // (现缓存10部影片) 初始为空, 待滑至 下部视频时，推入
+        videoItemCreator(), // 本影片
+        videoItemCreator() // 下一部影片
+      ],
     }
   }
+  private onIndexChange = (index, prevIndex) => {
+    const delta = index - prevIndex
+    if (delta > 0) { // 下一页
+      if (this.state.videoList.length < CACHE_VIDEO_LEN) { // 初始化状态 push 新影片即可
+        this.setState({
+          videoList: produce(this.state.videoList, draft => {
+            // if (draft.length < index)
+            draft.push(videoItemCreator())
+          })
+        }, () => {
+          console.log('top######')
+          console.log(this.state.videoList)
+        })
+      } else { // (已缓存CACHE_VIDEO_LEN部电影) 推入新影片， 清空 上一步影片，只留最近一部 调整 ScrollPager 位置
+        /**
+         *
+         * */
+        this.setState({
+          videoList: produce(this.state.videoList, draft => {
+            draft.push(videoItemCreator())
+            draft.shift()
+          }, () => {
+            console.log('bottom######')
+            console.log(this.state.videoList)
+          })
+        })
+      }
+    }
+  };
+  private renderItem = ({item}: {item: VideoItemType}) => (
+    <View style={styles.pageItem}>
+      <Text>{String(item.id).repeat(10)}</Text>
+    </View>
+  )
+  private keyExtractor = item => item.id
+  componentDidMount(): void {
+  }
+
   render() {
     return (
-      <Swiper
-        style={styles.container} horizontal={false} >
-        {this.state.videoList.map(item => (
-          <View key={item.id} style={{flex: 1, backgroundColor: "red"}}><Text>{item.id}</Text></View>
-        ))}
-      </Swiper>
+      <ScrollPager
+        scrollViewRef={ref => this.ScrollViewRef = ref}
+        data={this.state.videoList}  renderItem={this.renderItem}
+        keyExtractor={this.keyExtractor} pageHeight={PAGE_HEIGHT}
+        onIndexChange={this.onIndexChange} />
     )
   }
 }
@@ -44,5 +91,6 @@ class IndexScreen extends React.Component<any, StateType> {
 export default IndexScreen
 
 const styles = StyleSheet.create({
-  container: { flex: 1 }
+  container: { flex: 1 },
+  pageItem: { height: PAGE_HEIGHT, justifyContent: "center", alignItems: "center" }
 })
