@@ -72,7 +72,7 @@ class IndexScreen extends React.PureComponent<any, StateType> {
                 endIndex = beginIndex + index + 1
               }
             } else { // 要进入的下一步， 没有到达 临界点 不用push
-              draft[beginIndex + index + 1] = nextItemFuture
+              draft[beginIndex + index] = nextItemFuture
               endIndex = beginIndex + index + 1
             }
           })
