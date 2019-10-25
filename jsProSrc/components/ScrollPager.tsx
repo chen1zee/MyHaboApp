@@ -15,15 +15,12 @@ type Props<T> = {
   onIndexChange: (index?: number, prevIndex?: number) => void
   pageHeight: number // 页面高度
   // 获取 ScrollView ref
-  scrollViewRef?: (ref: any) => void
+  refFunc?: (ref: any) => void
 }
 class ScrollPager<T> extends React.PureComponent<Props<T>> {
-  static defaultProps = {
-  }
   private ScrollViewRef
   private beginDragY = 0
   private endDragY = 0
-  // TODO 记录 index 不适用，， 转为 每次计算下标
   private currentIndex = 0
   private onScrollBeginDrag = ({nativeEvent: {contentOffset: {y}}}: NativeSyntheticEvent<NativeScrollEvent>) => {
     this.beginDragY = y
@@ -39,17 +36,20 @@ class ScrollPager<T> extends React.PureComponent<Props<T>> {
       this.ScrollViewRef.scrollTo({ y: this.currentIndex * this.props.pageHeight, animated: true })
       this.props.onIndexChange(this.currentIndex, prevIndex)
     }
-    console.log("onScrollEndDrag")
   };
-  private getScrollViewRef = ref => {
-    this.ScrollViewRef = ref
-    this.props.scrollViewRef && this.props.scrollViewRef(ref)
+  public solveScroll2Index(i: number) { // 滚动到 下标 i
+    this.currentIndex = i
+    this.ScrollViewRef.scrollTo({ y: i * this.props.pageHeight, animated: true })
+    // 禁止触发 onIndexChange
+  }
+  componentDidMount(): void {
+    this.props.refFunc && this.props.refFunc(this)
   }
   render() {
     const {data, renderItem, keyExtractor, pageHeight} = this.props
     return (
       <ScrollView
-        ref={this.getScrollViewRef}
+        ref={ref => this.ScrollViewRef = ref}
         style={{height: pageHeight}}
         decelerationRate={100}
         onScrollBeginDrag={this.onScrollBeginDrag}

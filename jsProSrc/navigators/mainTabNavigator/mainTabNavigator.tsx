@@ -1,6 +1,6 @@
 import React from "react";
 import {createBottomTabNavigator} from "react-navigation-tabs";
-import { Image } from "react-native";
+import {Image} from "react-native";
 import {SCREEN_2_TITLE, SCREEN_NAMES} from "js_pro_src/navigators/screenNames";
 import {BTM_TAB_HEIGHT} from "js_pro_src/styles/size";
 import IndexScreen from "js_pro_src/screens/mainTabNavigator/IndexScreen/IndexScreen";

@@ -11,6 +11,11 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+
+/**
+ * !! 此组件 仅为 引入示例
+ * 不使用
+ * */
 public class RCTViewPackage implements ReactPackage {
     @Nonnull
     @Override

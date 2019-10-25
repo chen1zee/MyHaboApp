@@ -1,16 +1,12 @@
 package com.myhaboapp;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.facebook.react.PackageList;
-import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
-import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.myhaboapp.RNComponents.RCTViewPackage;
 
 import java.util.List;
 
@@ -29,7 +25,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here, for example:
       // packages.add(new MyReactNativePackage());
       // 添加 自己构建的 原生组件
-      packages.add(new RCTViewPackage());
+//      packages.add(new RCTViewPackage());
       // *************************
       return packages;
     }
